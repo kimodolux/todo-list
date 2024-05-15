@@ -6,7 +6,7 @@ function Form(props: {addTask: (name: string) => void}) {
 
     let handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        if(name == ""){
+        if(name === ""){
             return
         }
         event.preventDefault();
