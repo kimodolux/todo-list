@@ -1,12 +1,11 @@
 version: '3.8'
 services:
   client:
+    container_name: client
     build:
       context: client
     ports:
       - 3000:3000
-    networks:
-      - react-express
     depends_on:
       - server
 
@@ -15,29 +14,23 @@ services:
       context: server
     container_name: server
     restart: always
-    networks:
-      - express-mysql
-      - react-express
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      - mysql
       
-  db:
+  mysql:
+    container_name: mysql
     image: mysql:8.0
     restart: always
     environment:
       - MYSQL_DATABASE=${DATABASE_NAME}
       - MYSQL_ROOT_PASSWORD=${DATABASE_PASSWORD}
     ports:
-      - '3306:${DATABASE_PORT}'
+      - '3306:3306'
     volumes:
-      - db:/var/lib/mysql
+      - mysql:/var/lib/mysql
       # - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
 volumes:
-  db:
+  mysql:
     driver: local
-
-networks:
-  react-express:
-  express-mysql:

@@ -8,5 +8,5 @@ COPY package.json /todo-list/
 COPY tsconfig.json /todo-list/
 
 RUN npm install
-
+EXPOSE 3000
 CMD ["npm", "start"]

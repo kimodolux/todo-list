@@ -1,16 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import './App.css';
 import Todo from "./components/Todo";
 import Form from './components/Form';
 import FilterButton from './components/FilterButton';
 
+import axios from "axios";
 import { nanoid } from "nanoid";
 
-const todo_list: Task[] = [
-  { id: "todo-0", name: "Eat", completed: true },
-  { id: "todo-1", name: "Sleep", completed: false },
-  { id: "todo-2", name: "Repeat", completed: false },
-];
+const sendTaskToDB = async (task: Task) => {
+  let response =  await axios('http://localhost:8000/api/tasks', {
+    method: 'POST',
+    data: {
+      id: task.id,
+      name: task.name,
+      completed: task.completed,
+    },
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }) 
+  console.log(response.status)
+}
 
 type Task = {
   name: string,
@@ -38,11 +48,25 @@ const filter_todos = (task: Task, filter: string) => {
 }
 
 function App() {
-  const [tasks, setTasks] = useState(todo_list);
+  const [tasks, setTasks] = useState([] as Task[]);
   const [filter, setFilter] = useState("All");
 
+  useEffect(() => {
+    const getTasks = async() => {
+      let response = await axios('http://localhost:8000/api/tasks', {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      })
+      setTasks(response.data.result as Task[])
+    }
+    getTasks().catch(console.error);
+  }, [])
+
   function addTask(name: string) {
-    const newTask = { id: `todo-${nanoid()}`, name, completed: false };
+    const newTask: Task = { id: `todo-${nanoid()}`, name, completed: false };
+    sendTaskToDB(newTask)
     setTasks([...tasks, newTask]);
   }
 
@@ -92,7 +116,6 @@ function App() {
       </div>
       <h2 id="list-heading">{`${headingText} remaining`}</h2>
       <ul
-        role="list"
         className="todo-list stack-large stack-exception"
         aria-labelledby="list-heading">
         {
