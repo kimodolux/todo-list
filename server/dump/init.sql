@@ -1,0 +1,1 @@
+create table task (id varchar(40) unique not null, name varchar(40), completed boolean);

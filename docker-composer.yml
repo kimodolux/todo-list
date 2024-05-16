@@ -23,8 +23,6 @@ services:
     container_name: mysql
     image: mysql:8.0
     restart: always
-    env_file: 
-      - backend/.env
     environment:
       - MYSQL_DATABASE=${DATABASE_NAME}
       - MYSQL_ROOT_PASSWORD=${DATABASE_PASSWORD}
@@ -32,7 +30,7 @@ services:
       - '3306:3306'
     volumes:
       - mysql:/var/lib/mysql
-      # - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./server/dump/init.sql:/docker-entrypoint-initdb.d/init.sql
 volumes:
   mysql:
     driver: local
