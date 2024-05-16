@@ -4,29 +4,9 @@ import Todo from "./components/Todo";
 import Form from './components/Form';
 import FilterButton from './components/FilterButton';
 
-import axios from "axios";
 import { nanoid } from "nanoid";
-
-const sendTaskToDB = async (task: Task) => {
-  let response =  await axios('http://localhost:8000/api/tasks', {
-    method: 'POST',
-    data: {
-      id: task.id,
-      name: task.name,
-      completed: task.completed,
-    },
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }) 
-  console.log(response.status)
-}
-
-type Task = {
-  name: string,
-  completed: boolean,
-  id: string
-}
+import { Task } from "./types/Task";
+import { addTaskAsync, deleteTaskAsync, editTaskAsync, getTasksAsync } from "./axios/taskApi";
 
 const filter_list = [
   "All",
@@ -53,24 +33,30 @@ function App() {
 
   useEffect(() => {
     const getTasks = async() => {
-      let response = await axios('http://localhost:8000/api/tasks', {
-        method: "GET",
-        headers: {
-          'Content-Type': 'application/json'
-        },
-      })
-      setTasks(response.data.result as Task[])
+      let tasks = await getTasksAsync()
+      setTasks(tasks as Task[])
     }
     getTasks().catch(console.error);
   }, [])
 
-  function addTask(name: string) {
+  async function addTask (name: string) {
     const newTask: Task = { id: `todo-${nanoid()}`, name, completed: false };
-    sendTaskToDB(newTask)
+    const res = await addTaskAsync(newTask)
+    if(!res){
+      console.log("Error adding task")
+      return
+    }
     setTasks([...tasks, newTask]);
   }
 
-  function editTask(id: string, newName: string) {
+  async function editTask(id: string, newName: string) {
+    let task = tasks.find((t: Task) => t.id === id)
+    let newTask = {...task, name: newName} as Task
+    const res = await editTaskAsync(newTask)
+    if(!res){
+      console.log("Error editing task")
+      return
+    }
     const editedTaskList = tasks.map((task) => {
       if (id === task.id) {
         return { ...task, name: newName };
@@ -81,12 +67,24 @@ function App() {
   }
   
 
-  function deleteTask(id: string) {
+  async function deleteTask(id: string) {
+    const res = await deleteTaskAsync(id)
+    if(!res){
+      console.log("Error deleting task")
+      return
+    }
     const remainingTasks = tasks.filter((task) => id !== task.id);
     setTasks(remainingTasks);
   }
 
-  function toggleTaskCompleted(id: string) {
+  async function toggleTaskCompleted(id: string) {
+    let task = tasks.find((t: Task) => t.id === id)
+    let newTask = {...task, completed: !task?.completed} as Task
+    const res = await editTaskAsync(newTask)
+    if(!res){
+      console.log("Error toggling task")
+      return
+    }
     const updatedTasks = tasks.map((task) => {
       if (id === task.id) {
         return { ...task, completed: !task.completed };

@@ -7,7 +7,7 @@ const taskRouter = Router();
 taskRouter.get('/', taskController.getAll);
 taskRouter.post('/', taskController.addTask);
 taskRouter.delete('/', taskController.deleteTask);
-taskRouter.put('/', taskController.setTaskCompletion);
+taskRouter.put('/', taskController.editTask);
 
 // export the router
 export default taskRouter;
